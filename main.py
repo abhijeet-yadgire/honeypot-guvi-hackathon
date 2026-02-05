@@ -9,11 +9,12 @@ app = FastAPI()
 # Structure: { "session_id": [ {role: "user", content: "..."} ] }
 conversations_db = {}
 
-# Input Schema (matches the problem description)
+# Updated Schema with Default Values
 class ScammerMessage(BaseModel):
-    session_id: str
-    message: str
-    timestamp: str
+    # We add defaults (= "...") so the API never complains about missing fields
+    session_id: str = "test_session_123"
+    message: str = "Hello, this is a test message."
+    timestamp: str = "2026-01-01T12:00:00Z"
 
 # Output Schema
 class AgentResponse(BaseModel):
@@ -70,4 +71,5 @@ async def webhook(data: ScammerMessage, x_api_key: str = Header(None)):
         "agent_message": agent_reply,
         "extracted_intelligence": intelligence,
         "engagement_metrics": metrics
+
     }
