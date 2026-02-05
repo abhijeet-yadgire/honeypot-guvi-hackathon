@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel
 from typing import List, Optional
-import logic  # Import the logic we wrote above
+import logic
+from typing import List, Optional, Any
 
 app = FastAPI()
 
@@ -9,12 +10,18 @@ app = FastAPI()
 # Structure: { "session_id": [ {role: "user", content: "..."} ] }
 conversations_db = {}
 
-# Updated Schema with Default Values
+from typing import Optional, Any
+
+# "Universal" Schema - Accepts almost anything without complaining
 class ScammerMessage(BaseModel):
-    # We add defaults (= "...") so the API never complains about missing fields
-    session_id: str = "test_session_123"
-    message: str = "Hello, this is a test message."
-    timestamp: str = "2026-01-01T12:00:00Z"
+    session_id: Optional[str] = "default_session"
+    message: Optional[str] = "Hello, I am a scammer."
+    timestamp: Optional[str] = "2026-01-01"
+    
+    # This magic config tells Pydantic: 
+    # "If the tester sends extra random fields, just ignore them, don't crash!"
+    class Config:
+        extra = "allow"
 
 # Output Schema
 class AgentResponse(BaseModel):
@@ -73,3 +80,4 @@ async def webhook(data: ScammerMessage, x_api_key: str = Header(None)):
         "engagement_metrics": metrics
 
     }
+
